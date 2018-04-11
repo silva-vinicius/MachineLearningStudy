@@ -45,7 +45,7 @@ trainAdaline <- function(xin, yd, eta, tol, maxepocas, par){
       ei <- yd[irand] - yhati
       
       #creating the delta w vector
-      dw <- -eta*ei*xin[irand,]
+      dw <- eta*ei*xin[irand,]
       
       #adjusting the weights for the next iterations
       wt <- wt+dw
@@ -65,3 +65,23 @@ trainAdaline <- function(xin, yd, eta, tol, maxepocas, par){
   
   return (retlist)
 }
+
+
+#Testing the Adaline function
+
+#we will try to approximate the function f(x) = 4x+2,
+#where x = sin(t)
+
+
+#---------collecting test data-----------
+t<-matrix(seq(0.2*pi, 0.1*pi), ncol=1)
+x<-sin(t)
+y<-matrix((4*x)+2, ncol=1)
+#----------------------------------------
+
+trainedModel <-trainAdaline(x,y, 0.01, 0.001, 50, 1)
+w <- trainedModel[[1]]
+error<-trainedModel[[2]]
+
+
+
