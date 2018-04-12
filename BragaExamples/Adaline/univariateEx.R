@@ -18,8 +18,8 @@ trainAdaline <- function(xin, yd, eta, tol, maxepocas, par){
   
   #initializing the weights matrix. Initially they will contain random numbers (runif -> uniform distribution)
   if(par==1){
-    wt<-as.matrix(runif(n+1)-0.5)
-    xin<-cbind(1,xin)
+    wt <- as.matrix(runif(n+1)-0.5)
+    xin<-cbind(1, xin) #acho que ta errado isso aqui!
   }else{
     wt <- as.matrix(runif(n)-0.5)
   }
@@ -74,14 +74,15 @@ trainAdaline <- function(xin, yd, eta, tol, maxepocas, par){
 
 
 #---------collecting test data-----------
-t<-matrix(seq(0.2*pi, 0.1*pi), ncol=1)
+t<-matrix(seq(0, 2*pi, 0.1*pi), ncol=1)
 x<-sin(t)
 y<-matrix((4*x)+2, ncol=1)
 #----------------------------------------
 
-trainedModel <-trainAdaline(x,y, 0.01, 0.001, 50, 1)
+trainedModel <-trainAdaline(x,y, 0.01, 0.01, 50, 1)
 w <- trainedModel[[1]]
 error<-trainedModel[[2]]
 
+print(w)
 
 
