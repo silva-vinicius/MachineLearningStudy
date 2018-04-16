@@ -68,7 +68,8 @@ trainAdaline <- function(xin, yd, eta, tol, maxepocas, par){
 
 approximate <- function(value,trainedModel){
   
-  return (trainedModel  %*% value)
+  #Fixed: Had forgotten to use cbind()
+  return ( cbind(1,value) %*% trainedModel)
 }
 
 
@@ -92,20 +93,20 @@ plot(error, type="l", xlab="Epoch", ylab="Error")
 
 print(w)
 
-yhat <- numeric(length=length(x))
+#yhat <- numeric(length=length(x))
 
 
-yhat <- lapply(x, approximate, trainedModel=w)
-
-for(i in 1:length(x)){
-  
-  yhat <- w %*% x[i]
-}
+yhat <- as.numeric(lapply(x, approximate, trainedModel=w))
 
 
 #compare yhat to y
 plot(t, y, xlab = "x", ylab = "f(x)", type="n")
 lines(t, y, type = "o", col="black", pch=21, cex=0.6)
-lines(t, yhat, type = "o", col="red", pch=21, cex=0.6)
+lines(t, t(yhat), type = "o", col="red", pch=21, cex=0.6)
+legend("top", legend=c("f(x)", "Approx f(x)"),
+       col=c("black", "red"), lty=1:1, cex=0.8)
+
+
+
 
 
