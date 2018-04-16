@@ -19,7 +19,7 @@ trainAdaline <- function(xin, yd, eta, tol, maxepocas, par){
   #initializing the weights matrix. Initially they will contain random numbers (runif -> uniform distribution)
   if(par==1){
     wt <- as.matrix(runif(n+1)-0.5)
-    xin<-cbind(1, xin) #acho que ta errado isso aqui!
+    xin<-cbind(1, xin)
   }else{
     wt <- as.matrix(runif(n)-0.5)
   }
@@ -66,6 +66,11 @@ trainAdaline <- function(xin, yd, eta, tol, maxepocas, par){
   return (retlist)
 }
 
+approximate <- function(value,trainedModel){
+  
+  return (trainedModel  %*% value)
+}
+
 
 #Testing the Adaline function
 
@@ -83,6 +88,24 @@ trainedModel <-trainAdaline(x,y, 0.01, 0.01, 50, 1)
 w <- trainedModel[[1]]
 error<-trainedModel[[2]]
 
+plot(error, type="l", xlab="Epoch", ylab="Error")
+
 print(w)
+
+yhat <- numeric(length=length(x))
+
+
+yhat <- lapply(x, approximate, trainedModel=w)
+
+for(i in 1:length(x)){
+  
+  yhat <- w %*% x[i]
+}
+
+
+#compare yhat to y
+plot(t, y, xlab = "x", ylab = "f(x)", type="n")
+lines(t, y, type = "o", col="black", pch=21, cex=0.6)
+lines(t, yhat, type = "o", col="red", pch=21, cex=0.6)
 
 
