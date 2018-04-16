@@ -1,4 +1,4 @@
-#Adaline Univariate Example 
+#Adaline Multivariate Example 
 #Book: Introdução a Ciência de Dados - Uma perspectiva de redes neurais artificias e reconhecimento de padrões
 
 
@@ -73,37 +73,40 @@ approximate <- function(value,trainedModel){
 }
 
 
-#Testing the Adaline function
-
-#we will try to approximate the function f(x) = 4x+2,
-#where x = sin(t)
 
 
-#----------------------collecting test data----------------------
-t<-matrix(seq(0, 2*pi, 0.1*pi), ncol=1)
-x<-sin(t)
-y<-matrix((4*x)+2, ncol=1)
-#----------------------------------------------------------------
+t<-seq(0, 2*pi, 0.1*pi)
+x1<-matrix(sin(t)+cos(t), ncol=1)
+x2<-matrix(tanh(t), ncol = 1)
+x3<-matrix(sin(4*t), ncol = 1)
+x4<-matrix(abs(sin(t)), ncol = 1)
 
-trainedModel <-trainAdaline(x,y, 0.01, 0.01, 50, 1)
-w <- trainedModel[[1]]
-error<-trainedModel[[2]]
+#y is an arbitrary non-linear function
+y<-x1+2*x2+0.8*x3+3.2*x4+pi/2
 
-plot(error, type="l", xlab="Epoch", ylab="Error")
+x<-cbind(x1,x2,x3,x4)
 
-print(w)
+retlist<-trainAdaline(x,y,0.01,0.01,50,1)
 
-yhat <- as.numeric(lapply(x, approximate, trainedModel=w))
+w<-retlist[[1]]
+ttest <- seq(0,2*pi, 0.01*pi)
+
+x1t<-matrix(sin(ttest)+cos(ttest), ncol=1)
+x2t<-matrix(tanh(ttest), ncol = 1)
+x3t<-matrix(sin(4*ttest), ncol = 1)
+x4t<-matrix(abs(sin(ttest)), ncol = 1)
+xt <- cbind(1, x1t, x2t, x3t, x4t)
 
 
-#comparing yhat to y
-plot(t, y, xlab = "x", ylab = "f(x)", type="n")
-lines(t, y, type = "o", col="black", pch=21, cex=0.6)
-lines(t, t(yhat), type = "o", col="red", pch=21, cex=0.6)
+yhat<-xt%*%w
+
+yreal <-x1t+2*x2t+0.8*x3t+3.2*x4t+pi/2
+#comparing yhat to yreal
+
+plot(ttest, yreal, xlab = "x", ylab = "f(x)", type="n")
+lines(ttest, yreal, type = "l", col="black", pch=21, cex=0.6)
+lines(ttest, t(yhat), type = "l", col="red", pch=21, cex=0.6)
 legend("top", legend=c("f(x)", "Approx f(x)"),
        col=c("black", "red"), lty=1:1, cex=0.8)
-
-
-
 
 
