@@ -12,4 +12,9 @@ print (result)
 
 #we dont have to worry about closing the session because the following block does that for us
 with tf.Session() as sess:
-	print(sess.run(result))
+
+	#storing the result of the execution of the computation model into a python variable
+	output = sess.run(result) 
+
+	#this will print the result of the computation model
+	print(output)
