@@ -1,3 +1,5 @@
+#tutorial available at: https://pythonprogramming.net/tensorflow-deep-neural-network-machine-learning-tutorial/
+
 '''
 Planning:
 	
@@ -18,6 +20,7 @@ import tensorflow as tf
 from tensorflow.examples.tutorials.mnist import input_data
 
 
+#reading the dataset (it's a tutorial example from the language)
 mnist = input_data.read_data_sets("/tmp/data", one_hot=True)
 
 #understanding oneHot encoding
@@ -53,7 +56,7 @@ y=tf.placeholder('float')
 #builds the computation graph
 def neural_network_model(data):
 
-					#one column per neuron. Each neuron receives 784 sinapses # Matrix Z
+					#one column per neuron. Each neuron receives 784 sinapses - Matrix Z1 - 784 rows - 500 columns
 	hidden_1_layer={'weights': tf.Variable(tf.random_normal([784, n_nodes_hl1])),
 
 					#each neuron also gets a bias, which is a constant that we will add to the summation
@@ -69,6 +72,7 @@ def neural_network_model(data):
 				  'biases': tf.Variable(tf.random_normal([n_classes]))}
 
 
+	#tf.add -> Matrix sum. We are adding the result of data*Z1 and layer 1 biases
 	l1 = tf.add( tf.matmul(data, hidden_1_layer['weights']), hidden_1_layer['biases'])
 	#relu = rectified linear function -> This is our activation function
 	l1 = tf.nn.relu(l1)
@@ -95,7 +99,7 @@ def train_neural_network(X):
 	#we will use the AdamOptimizer to minimize the cost function
 	optimizer = tf.train.AdamOptimizer().minimize(cost)
 
-	#cycles feed forward + backprop
+	#cycles (feed forward + backprop)
 	n_epochs = 10
 
 	with tf.Session() as sess:
