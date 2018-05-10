@@ -1,3 +1,4 @@
+#understanding https://dev.to/n1try/cartpole-with-q-learning---first-experiences-with-openai-gym
 import gym
 import numpy as np
 import math
