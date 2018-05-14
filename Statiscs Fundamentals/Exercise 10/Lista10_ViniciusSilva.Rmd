@@ -1,0 +1,358 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+<h3>Nome: Vinícius de Oliveira Silva</h3>
+
+<h3>Matrícula: 2013007820</h3>
+
+<br/>
+<br/><h4><b>Questão 8.11 - Johnson Wichern</b></h4>
+
+<b>a)</b>
+```{r}
+#leitura da tabela original
+table = read.table("T8-5.DAT", header=FALSE)
+
+
+#extraindo a matriz de covariancia original
+estimatedCovTransform <- cov(table)
+
+#multiplicando a ultima coluna por 10
+transformedTable <- table
+transformedTable[,5] <- transformedTable[,5]*10
+
+#extraindo a nova matriz de covariancia
+covTransform <- cov(transformedTable)
+
+#obtendo a nova matriz de cov a partir da original
+estimatedCovTransform[,5] <- estimatedCovTransform[,5]*10
+estimatedCovTransform[5,] <- estimatedCovTransform[5,]*10
+
+#Checando nossa aproximacao:
+expectedZeros <- round(estimatedCovTransform - covTransform)
+
+sprintf("Essa matriz deveria ser composta apenas por zeros:")
+prmatrix(expectedZeros, rowlab=rep("",5), collab=rep("",5))
+
+```
+O procedimento de multiplicar a quinta coluna e a quinta coluna funciona porque a variancia da quinta variável segue a fórmula:
+
+<center>V(c'X) = c'V(X)c</center>
+
+como c é uma constante numérica igual a 10, a nova variância fica multiplicada por c<sup>2</sup> = 100.
+Os elementos da quinta coluna e da quinta linha dependem da raíz quadrada da nova variância, que é 10 * (variância original)
+
+
+<b>b)</b>
+```{r}
+#calculo do PCA propriamente dito
+pca <- prcomp(t(transformedTable))
+
+pca
+```
+Duas primeiras componentes principais:
+
+```{r}
+#salvamos os autovalores e os autovetores
+eigenvalues <- (pca$sdev)^2
+eigenvectors <- (pca$rot)
+
+print(eigenvectors[,c(1,2)])
+```
+
+<b>c)</b>
+```{r}
+#proporcao de variancia
+
+varRatio <- sum(eigenvalues[c(1,2)])/sum(eigenvalues)
+sprintf("As duas primeiras componentes principais explicam %s%% da variancia", format(round(varRatio*100, digits = 2), nsmall = 2))
+
+#Computando as correlações:
+originalCors <- cor(table)
+transformedCors <- cor(transformedTable)
+
+#verificando as diferenças entre as correlações da matriz original e da transformada:
+expectedZeros <- round(transformedCors - originalCors)
+
+sprintf("Essa matriz deveria ser composta apenas por zeros:")
+prmatrix(expectedZeros, rowlab=rep("",5), collab=rep("",5))
+
+```
+Percebemos que as correlações não são afetadas quando fazemos uma mudança de escala em uma das variáveis.
+
+```{r}
+#computando os autovetores considerando a matriz original:
+
+#calculo do PCA propriamente dito
+pcaOriginal <- prcomp(t(table))
+
+originalEigenvals <- (pcaOriginal$sdev)^2
+
+originalVarRatio <- sum(originalEigenvals[c(1,2)])/sum(originalEigenvals)
+
+#podemos visualizar a proporção de variancia explicada pelos dois primeiros PC's em ambos os casos:
+
+sprintf("Na matriz modificada, as duas primeiras componentes principais explicam %s%% da variancia", format(round(varRatio*100, digits = 2), nsmall = 2))
+
+sprintf("Na matriz original, as duas primeiras componentes principais explicam %s%% da variancia", format(round(originalVarRatio*100, digits = 2), nsmall = 2))
+```
+
+Como podemos ver, ao alterarmos a escala da última coluna, os dois primeiros componentes passam a explicar ligeiramente menos variância, o que significa que essa coluna passou a ser mais significativa.
+
+
+<br/><h4><b>Questão 3</b></h4>
+
+```{r}
+
+sigma <- matrix(c(1.24, 0.48, 0.16, 0.48, 0.86, 0.12, 0.16, 0.12, 0.14), ncol = 3, nrow = 3)
+
+l <- c(0.8, 0.6, 0.2)
+
+#Podemos obter a matriz psi através do calculo de Sigma - (LL')
+psi <- sigma - (l%*%t(l))
+
+sprintf("A matriz Ψ é:")
+prmatrix(round(psi,2), rowlab=rep("",3), collab=rep("",3))
+
+```
+
+
+<br/><h4><b>Questão 4</b></h4>
+
+```{r}
+
+#URL do arquivo de treinamento 
+arq = "http://archive.ics.uci.edu/ml/machine-learning-databases/wine/wine.data"
+
+#abertura do arquivo para leitura
+wine=read.table(arq, sep=",")
+
+#visualização dos primeiros registros
+head(wine)
+
+#visualização da dispersão entre as variáveis de 2 a 6
+pairs(wine[,2:6])
+
+#calcula a correlação entre as colunas de 2 a 14 e multiplica por 100
+round(100*cor(wine[,2:14]))
+
+#calcula o desvio padrao de todas as variáveis individualmente
+round(apply(wine[,2:14], 2, sd),2)
+
+#calcula os autovetores e os autovalores da matriz de covariancia
+wine.pca <- prcomp(wine[,2:14], scale. = TRUE)
+
+#exibe um resumo das componentes principais
+summary(wine.pca)
+
+#exibe a raíz quadrada dos autovalores
+wine.pca$sdev
+
+#soma os autovalores
+sum((wine.pca$sdev)^2)
+
+#???
+screeplot(wine.pca, type="lines")
+
+
+# Barplot das variancias acumuladas
+barplot(cumsum(wine.pca$sdev^2)/sum(wine.pca$sdev^2))
+# os dois primeiros PCA's explicam aprox 60% da variancia total
+# os 5 primeiros explicam aprox 80%
+
+# Os autovetores
+dim(wine.pca$rot)
+# A matriz de autovetores é 13x13
+
+
+# O 1o autovetor
+wine.pca$rot[,1]
+
+# O 2o autovetor
+wine.pca$rot[,2]
+
+# Coordenadas dos pontos ao longo do primeiro componente
+fscore1 = wine.pca$x[,1]
+
+# Coordenadas dos pontos ao longo do segundo componente
+fscore2 = wine.pca$x[,2]
+
+# plot dos pontos projetados
+plot(fscore1, fscore2, pch="*", col=wine[,1]+8)
+
+#matriz de dados padronizada:
+z = scale(wine[2:14])
+
+zMeans <- round(apply(z, 2, mean), 5) # media das colunas da matriz
+zSDs <- round(apply(z, 2, sd), 5) # sd das colunas da matriz
+```
+
+<b>a)</b>
+
+```{r}
+#os valores das (??) são simplesmente as componentes dos autovetores:
+sprintf("Os coeficientes que multiplicam Z para formar Yi1 são: ")
+wine.pca$rot[,1]
+
+```
+
+<br/>
+
+```{r}
+sprintf("Os coeficientes que multiplicam Z para formar Yi2 são: ")
+wine.pca$rot[,2]
+
+```
+
+</b>b)</b>
+
+Podemos utilizar as regiões superior esquerda, inferior central e superior direita para classificarmos as amostras de vinhos.
+
+
+</b>c)</b>
+```{r}
+
+x = c(13.95, 3.65, 2.25, 18.4, 90.18, 1.55, 0.48, 0.5, 1.34, 10.2, 0.71, 1.48, 587.14 )
+
+wineMeans <- round(apply(wine[, 2:14], 2, mean), 5)
+wineSDs <- round(apply(wine[, 2:14], 2, sd), 5)
+
+zx <- (x - wineMeans) / (wineSDs)
+
+Yx <- c(wine.pca$rot[,1] %*% zx, wine.pca$rot[,2] %*% zx )
+
+sprintf("No espaço formado pelas componentes principais do conjunto de dados, as cordenadas do vinho x são: ")
+
+Yx
+```
+
+
+Plotando este ponto no gráfico, temos:
+```{r}
+plot(fscore1, fscore2, pch="*", col=wine[,1]+8)
+points(Yx[1], Yx[2], pch="*", cex=4)
+
+```
+Percebemos portanto que o vinho tem grandes chances de pertencer ao cultivar 3
+
+<br/><h4><b>Questão 5</b></h4>
+```{r}
+
+beer <- read.table("Beer.txt", header=TRUE)
+
+head(beer)
+summary(beer)
+
+S <- var(beer[,1:7], na.rm = T)
+
+S
+
+sqrt(diag(S)) # sd's not very different
+
+R = cor(beer[,1:7], use ="complete.obs")
+
+round(100*R)
+
+library(corrplot)
+
+corrplot(R, method = "ellipse")
+
+# plotando as elipses e os valores das correlacoes
+corrplot.mixed(R, upper = "ellipse")
+
+# rearranjando as linhas e colunas para agrupar variaveis com correlacoes parecidas
+corrplot.mixed(R, order = "AOE", upper = "ellipse", cl.align = "r")
+
+
+newbeer = na.omit(beer)
+S = cov(newbeer[,1:7])
+fit = eigen(S) # usa o algoritmo QR em cima da matriz S
+# autovalores
+fit$values
+# autovetores
+fit$vectors
+
+
+pca.beer = prcomp(newbeer[,1:7])
+# Se quiser obter PCA da matriz de correla\c{c}\~{a}o, use
+# pca.beer = prcomp(newbeer[,1:7], scale. = TRUE)
+# Os 7 autovetores
+pca.beer$rot
+# Os 7 autovalores
+(pca.beer$sdev)^2
+
+
+#verificando que os autovetores gerados por prcomp são os mesmos gerados por eigen:
+round(abs(pca.beer$rot) - abs(fit$vectors), 2)
+
+
+# verifique que os autovetores tem norma euclidiana = 1.
+# Por exemplo, o 1o PCA:
+sum(pca.beer$rot[,1]^2)
+
+# Grafico scree com os 7 autovalores (ou variancias de cada PCA)
+plot(pca.beer)
+
+# Barplot das variancias acumuladas indicando a escolha de 2 PCAs
+barplot(cumsum(pca.beer$sdev^2))
+
+
+# Resumo
+summary(pca.beer)
+
+# Note que o quadrado da linha Standard deviation acima eh igual aos autovalores
+# obtidos com fit$values
+round(sum(fit$values) - sum(pca.beer$sdev^2),2)
+
+
+# Vamos usar apenas os dois 1os PCs para representar R com dois fatores
+# Carga do Fator = sqrt(LAMBDA) * EIGENVECTOR
+cargafat1 = pca.beer$sdev[1] * pca.beer$rot[,1]
+cargafat2 = pca.beer$sdev[2] * pca.beer$rot[,2]
+# matriz de cargas
+L = cbind(cargafat1, cargafat2)
+
+rownames(L) = rownames(R)[1:7]
+
+round(L, 2)
+
+plot(L, type="n",xlim=c(-40, 20), ylim=c(-10, 25))
+text(L, rownames(L))
+abline(h=0)
+abline(v=0)
+
+
+# Fazendo manualmente uma rotacao horaria de pi/2+15*pi/180
+phi = pi/2 + 15*(pi/180)
+T = matrix(c(cos(phi), -sin(phi), sin(phi), cos(phi)), ncol=2, byrow=T)
+
+Lstar = L %*% T # usando a multiplicacao por linha da matriz L
+plot(Lstar, type="n", xlim=c(-20, 30), ylim=c(-15, 35))
+text(Lstar, rownames(L))
+abline(h=0); abline(v=0)
+
+round(Lstar,2)
+
+
+matpsi = diag(diag(S - Lstar %*% t(Lstar)))
+round(matpsi, 2)
+sum( (S - Lstar %*% t(Lstar) - matpsi)^2 )/sum(S^2)
+
+## Factor scores dos n=220 individuos
+factors <- matrix(0, nrow=nrow(beer), ncol=2)
+mu <- apply(newbeer[,1:7], 2, mean)
+
+for(i in 1:nrow(newbeer)){
+  y <- as.numeric(newbeer[i, 1:7] - mu)
+  factors[i,] <- lm(y~0 + Lstar)$coef
+}
+
+plot(factors, xlab="fator 1", ylab="fator2")
+
+# mas... onde estao os 220 individuos?
+# Varios individuos poduziram o MESMO vator x --> estimamos com os mesmos fatores
+plot(jitter(factors, amount=0.05), xlab="fator 1", ylab="fator2")
+
+```
