@@ -8,7 +8,20 @@ output: html_notebook
 <h3>Matrícula: 2013007820</h3>
 
 <br/>
-<br/><h4><b>Questão 8.11 - Johnson Wichern</b></h4>
+<br/><h4><b> Questão 1</b></h4>
+
+<b>a)</b>
+
+<img src="Q1a.PNG"></img>
+
+
+<b>b)</b>
+
+<img src="Q1b.PNG"></img>
+
+
+<br/>
+<br/><h4><b> Questão 2 - Exercício 8.11 - Johnson Wichern</b></h4>
 
 <b>a)</b>
 ```{r}
@@ -195,23 +208,22 @@ zSDs <- round(apply(z, 2, sd), 5) # sd das colunas da matriz
 #os valores das (??) são simplesmente as componentes dos autovetores:
 sprintf("Os coeficientes que multiplicam Z para formar Yi1 são: ")
 wine.pca$rot[,1]
-
 ```
-
-<br/>
-
 ```{r}
 sprintf("Os coeficientes que multiplicam Z para formar Yi2 são: ")
 wine.pca$rot[,2]
 
 ```
 
-</b>b)</b>
+<br/>
+
+
+<b>b)</b>
 
 Podemos utilizar as regiões superior esquerda, inferior central e superior direita para classificarmos as amostras de vinhos.
 
-
-</b>c)</b>
+<br/>
+<b>c)</b>
 ```{r}
 
 x = c(13.95, 3.65, 2.25, 18.4, 90.18, 1.55, 0.48, 0.5, 1.34, 10.2, 0.71, 1.48, 587.14 )
