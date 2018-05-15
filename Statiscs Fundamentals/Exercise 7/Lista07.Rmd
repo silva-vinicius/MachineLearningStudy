@@ -1,0 +1,171 @@
+---
+title: "Lista 07 - Fundamentos Estatísticos para Ciência dos Dados"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+---
+<h3>Nome: Vinícius de Oliveira Silva</h3>
+
+<h3>Matrícula: 2013007820</h3>
+
+
+<!-- This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code.  
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. -->
+
+ <p style="text-align: center;"> Exercícios Livro Johnson e Wichern </p>
+
+
+<h4>Questão 1.6</h4>
+
+```{r}
+
+table = read.table("T1-5.dat", header=FALSE)
+
+
+titles = c("Wind", "Solar radiation", "CO", "NO", "NO2", "O3", "HC")
+tIndex <- 1
+
+for (i in names(table)){
+  hist(as.array(table[[i]]), main = paste(titles[tIndex], "Distribution"), xlab = " ")
+  tIndex <- tIndex + 1
+}
+```
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+
+Definindo a função estatística d<sup>2</sup>(<b>y</b>, <b>µ</b>)
+
+```{r}
+#Gerando um vetor com as variancias de cada uma das 7 v.a's:
+variances <- numeric(length = 7)
+counter <- 1
+for(i in names(table)){
+  
+  variances[counter] <- var(table[[i]])
+  counter <- counter+1
+}
+
+#Computando a matriz de covariancia
+#-------------------------------------------------------------------------------------
+covMatrix <- diag(variances)
+
+i<-1
+j<-1
+
+while(i<=7){
+  j<-1
+  while (j<=7) {
+    if(i!=j){
+      covMatrix[i,j]<-sqrt(variances[i])*sqrt(variances[j])*cor(table[i], table[j])
+    }
+    j<-j+1
+  }
+  i<-i+1
+}
+
+#-------------------------------------------------------------------------------------
+
+#Computando o vetor esperado µ
+#-------------------------------------------------------------------------------------
+mu <- as.numeric(apply(table, MARGIN=2, FUN=mean)) 
+#-------------------------------------------------------------------------------------
+
+#Definindo a funcao:
+d2 <- function(y){
+  return (t(y-mu)%*%solve(covMatrix)%*%(y-mu))
+  
+}
+```
+
+
+Calculando a distancia de cada ponto ao vetor esperado, gerando o histograma das distancias e sobrepondo a curva chi-squared:
+```{r}
+distances <- apply(table, MARGIN = 1, FUN = d2)
+hist(distances, probability = TRUE, main="Histograma das distancias entre cada ponto e o vetor esperado")
+x <-rchisq(nrow(table), 7)
+plot( function(x) dchisq(x, df=7), from=0, to=20, add=TRUE)
+
+```
+
+
+
+<h4>Questão 2.7</h4>
+
+```{r echo=FALSE}
+matrixA = matrix( c(9, -2, -2, 6),
+                 nrow=2,
+                 ncol=2)
+```
+</br>
+<b>a)</b>
+
+Os autovalores da matriz são:
+```{r echo=FALSE}
+
+eigenResults = eigen(matrixA)
+print(eigenResults$values)
+```
+
+Os autovetores são:
+```{r echo=FALSE}
+
+print(eigenResults$vectors)
+
+```
+
+</br>
+
+<b>b)</b>
+
+Sabemos que a decomposição espectral de uma matriz A é dada por PDP<sup>T</sup>, onde P é a matriz formada pelos autovetores de A e D é uma matriz em que os elementos da diagonal são os autovetores de A e os demais são 0s.
+Desta forma, para mostrarmos a decomposição espectral da matriz, basta que apresentemos a matriz P, a matriz D e a matriz P<sup>T</sup>.
+
+Matriz P:
+```{r echo=FALSE}
+print(as.matrix(eigenResults$vectors))
+```
+
+Matriz D:
+```{r echo=FALSE}
+print(diag(eigenResults$values))
+```
+
+Matriz P<sup>T</sup>:
+```{r echo=FALSE}
+print(t(as.matrix(eigenResults$vectors)))
+```
+
+</br>
+<b>c)</b>
+
+Para encontrarmos a inversa da matriz A, fazemos:
+```{r}
+
+matrixAInverse <-solve(matrixA) 
+print(matrixAInverse)
+```
+
+<br/>
+<b>d)</b>
+
+Os autovetores de A<sup>-1</sup> são:
+```{r echo=FALSE}
+eigenResultsInverse <- eigen(matrixAInverse)
+print(eigenResultsInverse$vectors)
+```
+
+Os autovalores de A<sup>-1</sup> são:
+```{r echo=FALSE}
+print(eigenResultsInverse$values)
+```
+
+
+<br/>
+<h4>Questão 2.18</h4>
+??
