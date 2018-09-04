@@ -1,5 +1,5 @@
 from keras.models import Sequential
-from keras.layers import Dense, Dropout
+from keras.layers import Dense
 from keras.optimizers import Adam
 import numpy as np
 import gym
@@ -10,18 +10,18 @@ import os.path
 
 class DeepQCartSolver():
 
-    def __init__(self, nEpisodes=2000, minScoreToWin=195, gamma=0.5, epsilon=1.0, minEpsilon=0.01, epsilonDecay=0.995,
+    def __init__(self, nEpisodes=2000, minScoreToWin=180, gamma=1.0, epsilon=1.0, minEpsilon=0.01, epsilonDecay=0.995,
                  alpha=0.01, alphaDecay=0.01, batchSize=64):
 
         self.env = gym.make('CartPole-v0')
         self.nEpisodes = nEpisodes
         self.minScoreToWin = minScoreToWin
         self.memory = deque(maxlen=50000)  # This dataset will feed our neural network with data
-        self.gamma = gamma # This quantifies the difference in importance between immediate rewards and future rewards
-        self.epsilon = epsilon # controls the probability of performing a random action
+        self.gamma = gamma
+        self.epsilon = epsilon
         self.minEpsilon = minEpsilon
         self.epsilonDecay = epsilonDecay
-        self.alpha = alpha # controls how fast we optimize using gradient descent
+        self.alpha = alpha
         self.alphaDecay = alphaDecay
         self.batchSize = batchSize
 
@@ -73,25 +73,21 @@ class DeepQCartSolver():
         # self.Q[state_old][action] = alpha * (reward + self.gamma * np.max(self.Q[state_new])
 
         # as we will use batch training, we must gather all the states that we want to pass to the neural net
-        # x_batch is a list of states (list of arrays[4])
         x_batch = []
 
         # we must also gather the labels of these states
-        # y_batch is a list of q-values (list of arrays[2])
         y_batch = []
 
         # populate the minibatch with a random sample of our past experiences
         minibatch = random.sample(list(self.memory), min(len(self.memory), batchSize))
-        # obs.: we use the whole memory if the specified batch size is greater than the actual available memory
 
         # we will update the q-values of each element of this sample
         for state, action, reward, next_state, done in minibatch:
 
-            # state shape [[x,y,z,w] ]
+            #print(state)
 
             # we retrieve the entry that we want to update: (predict() method returns a numpy array)
             target = self.nnModel.predict(self.reshapeState(state))
-            # target shape [[x,y] ] -> x is the q-value of action 0 and y is the q-value for action 1
 
             # now we are going to update it
 
@@ -103,7 +99,6 @@ class DeepQCartSolver():
                 target[0][action] = reward + self.gamma * np.max(self.nnModel.predict(self.reshapeState(next_state)))
 
             # collecting the sampled states into an array
-            # state[0] shape -> [x,y,z,w]
             x_batch.append(state[0])
 
             # computing the labels of the states we are going to train the network on
@@ -133,27 +128,15 @@ class DeepQCartSolver():
     def run(self):
         scores = deque(maxlen=100)
 
-        # the code will run as many episodes as we want -> nEpisodes = 2000
         for e in range(self.nEpisodes):
-            # #we read the initial state from the environment
             state = self.reshapeState(self.env.reset())
-
             done = False
             i = 0
-
             while not done:
                 self.env.render()
-
-                # selecting an action to take given the state we are in
                 action = self.getAction(state, self.getEpsilon(e))
-
-                # we take the selected action and read the environment again so we can see how it changed
                 next_state, reward, done, _ = self.env.step(action)
-
-                # we add our move to the agent's memory
                 self.rememberState(state, action, reward, self.reshapeState(next_state), done)
-
-                # we assume that the current state is last step's resulting state
                 state = self.reshapeState(next_state)
                 i += 1
 
@@ -168,7 +151,6 @@ class DeepQCartSolver():
             if (e % 100 == 0):
                 print('Episode {} - Average survival time over last 100 episodes was {} ticks'.format(e, avg_score))
 
-            # we update the neural net after each episode
             self.updateNetwork(self.batchSize)
 
             print("Avg score: {} / Last score: {} \nEpisode: {} Epsilon: {}".format(avg_score, i, e, self.epsilon))
@@ -181,6 +163,7 @@ class DeepQCartSolver():
 if __name__ == '__main__':
     agent = DeepQCartSolver()
     agent.run()
+
 
 
 
