@@ -27,7 +27,7 @@ class DeepQCartSolver():
 
         self.nnModel = self.initNNModel()
 
-    # layerNeurons -> input_nodes, hiddem_nodes, hidden_nodes, output_node
+    # layerNeurons -> input_nodes, hidden_nodes, hidden_nodes, output_node
     # activationFunc -> hidden_nodes activation, hidden_nodes activation, output_activation
     def initNNModel(self, layerNeurons=[4, 24, 48, 2], activationFunc=['relu', 'relu', 'linear'], lossFunc='mse'):
 
@@ -89,6 +89,7 @@ class DeepQCartSolver():
 
             # state shape [[x,y,z,w] ]
 
+            #We are querying the NN for the value we want to update
             # we retrieve the entry that we want to update: (predict() method returns a numpy array)
             target = self.nnModel.predict(self.reshapeState(state))
             # target shape [[x,y] ] -> x is the q-value of action 0 and y is the q-value for action 1
@@ -117,14 +118,14 @@ class DeepQCartSolver():
             self.epsilon *= self.epsilonDecay
 
     # returns the action we should take when we are in a given state
-    def getAction(self, state, epsilon):
+    def getAction(self, state, epsilon): #Epsilon is the threshold for random actions
 
         # we test whether a random value is smaller than our threshold epsilon. if so, return a random action:
         if np.random.random() <= epsilon:
             return self.env.action_space.sample()
         else:
             # we use our neural network to predict the value of the possible actions from this state and return the one with the highest value
-            return np.argmax(self.nnModel.predict(state))
+            return np.argmax(self.nnModel.predict(state)) #the predict method returns the estimation of the values of each possible state
 
     def getEpsilon(self, t):
 
@@ -141,6 +142,7 @@ class DeepQCartSolver():
             done = False
             i = 0
 
+
             while not done:
                 self.env.render()
 
@@ -150,7 +152,7 @@ class DeepQCartSolver():
                 # we take the selected action and read the environment again so we can see how it changed
                 next_state, reward, done, _ = self.env.step(action)
 
-                # we add our move to the agent's memory
+                # we add our move to the agent's memory -- We will iteratively gather data to train our network
                 self.rememberState(state, action, reward, self.reshapeState(next_state), done)
 
                 # we assume that the current state is last step's resulting state
@@ -181,16 +183,3 @@ class DeepQCartSolver():
 if __name__ == '__main__':
     agent = DeepQCartSolver()
     agent.run()
-
-
-
-
-
-
-
-
-
-
-
-
-
